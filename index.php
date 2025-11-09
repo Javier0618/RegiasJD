@@ -34,37 +34,50 @@
 
 <!-- Booking Modal (hidden by default) -->
 <div id="booking-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h3>Confirmar Cita</h3>
-        <p><strong>Fecha:</strong> <span id="modal-date"></span></p>
-        <p><strong>Hora:</strong> <span id="modal-time"></span></p>
-        <form id="booking-form">
-            <input type="hidden" id="modal-datetime-input" name="datetime">
-            <div class="form-group">
-                <label for="client-name">Nombre Completo</label>
-                <input type="text" id="client-name" name="name" required>
+    <div class="modal-content redesigned">
+        <div class="modal-header">
+            <div class="header-icon-title">
+                <i data-lucide="sparkles"></i>
+                <h2>Agendar Cita</h2>
             </div>
-            <div class="form-group">
-                <label for="client-phone">Celular</label>
-                <input type="tel" id="client-phone" name="phone" required>
-            </div>
-            <div class="form-group">
-                <label for="services">Servicios</label>
-                <select id="services" name="services[]" multiple required>
-                    <!-- Services will be loaded from DB -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="comments">Comentario (Opcional)</label>
-                <textarea id="comments" name="comments" rows="3"></textarea>
-            </div>
-            <div class="booking-summary">
-                <p><strong>Tiempo Total:</strong> <span id="total-duration">0</span> min</p>
-                <p><strong>Precio Total:</strong> $<span id="total-price">0</span></p>
-            </div>
-            <button type="submit" class="btn-primary">Agendar Cita</button>
-        </form>
+            <button class="close-button">&times;</button>
+        </div>
+        <div class="modal-subheader">
+            <span id="modal-date-display"><i data-lucide="calendar"></i> martes, 11 de noviembre</span>
+            <span id="modal-time-display"><i data-lucide="clock"></i> 08:00 AM</span>
+        </div>
+        <div class="modal-body">
+            <form id="booking-form" class="styled-form">
+                <input type="hidden" id="modal-datetime-input" name="datetime">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client-name">Nombre Completo *</label>
+                        <input type="text" id="client-name" name="name" placeholder="Tu nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="client-phone">Número de Celular *</label>
+                        <input type="tel" id="client-phone" name="phone" placeholder="Ej: 3001234567" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Servicios * <span class="label-subtitle">(Selecciona uno o más)</span></label>
+                    <div class="service-list" id="services-list-container">
+                        <!-- Services will be dynamically inserted here -->
+                    </div>
+                    <p class="error-message" id="service-error">Por favor selecciona al menos un servicio</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Notas Adicionales (Opcional)</label>
+                    <textarea id="comments" name="comments" placeholder="Alguna preferencia o detalle adicional..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-submit-booking">Confirmar Cita</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
