@@ -5,7 +5,24 @@ require_admin();
 // Handle form submissions for add/edit/delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_schedule'])) {
-        // Add logic
+        $date = $_POST['date'];
+        $start_time = $_POST['start_time'];
+        $end_time = $_POST['end_time'];
+
+        if (!empty($date) && !empty($start_time) && !empty($end_time)) {
+            $stmt = $conn->prepare("INSERT INTO schedules (date, start_time, end_time) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $date, $start_time, $end_time);
+            
+            if ($stmt->execute()) {
+                header("Location: horarios.php");
+                exit();
+            } else {
+                $error_message = "Error al guardar el horario.";
+            }
+            $stmt->close();
+        } else {
+            $error_message = "Todos los campos son obligatorios.";
+        }
     } elseif (isset($_POST['edit_schedule'])) {
         // Edit logic
     } elseif (isset($_POST['delete_schedule'])) {
