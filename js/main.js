@@ -178,26 +178,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
             // Format time for display
             let formattedTime = '';
-            let twentyFourHourTime = time;
             try {
-                // Check if time is in AM/PM format and convert it
-                if (time.includes('AM') || time.includes('PM')) {
-                    twentyFourHourTime = convert_to_24h(time);
-                }
-
-                const dateTimeString = `${date}T${twentyFourHourTime}`;
+                const dateTimeString = `${date}T${time}`;
                 const timeObj = new Date(dateTimeString);
                 if (isNaN(timeObj)) {
                     throw new Error('Invalid time value');
                 }
-                
-                // We format the original time for display, not the 24h one
                 formattedTime = new Intl.DateTimeFormat('es-ES', {
                     hour: 'numeric',
                     minute: '2-digit',
                     hour12: true
                 }).format(timeObj);
-
             } catch (e) {
                 console.error(`Could not parse time: ${time}`, e);
                 formattedTime = 'Hora inválida'; // Fallback display
@@ -210,25 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'block';
             
             loadServices();
-            lucide.createIcons(); // Refresh icons if they are added dynamically
+            // lucide.createIcons(); // Refresh icons if they are added dynamically
         } else {
             console.error("Booking modal not found on this page.");
         }
-    }
-    
-    function convert_to_24h(time_str) {
-        const [time, modifier] = time_str.split(' ');
-        let [hours, minutes] = time.split(':');
-    
-        if (hours === '12') {
-            hours = '00';
-        }
-    
-        if (modifier === 'PM') {
-            hours = parseInt(hours, 10) + 12;
-        }
-    
-        return `${hours}:${minutes}`;
     }
     
     // Event Listeners for week navigation
