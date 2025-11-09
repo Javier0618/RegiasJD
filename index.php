@@ -1,37 +1,32 @@
 <?php require_once 'includes/header.php'; ?>
 
-<div class="page-container">
-    <div class="page-header">
-        <h1>Agendar Cita</h1>
-        <p>Selecciona una fecha y hora para tu cita.</p>
+<div class="page-container-agendar">
+    <div class="agendar-hero">
+        <div class="hero-content">
+            <h1>Agenda tu Cita</h1>
+            <p>Elige el día y la hora que mejor te convenga.</p>
+        </div>
     </div>
 
-    <div class="scheduler-container">
-        <!-- Calendar Section -->
-        <div class="calendar-wrapper">
-            <h2>Elige un Día</h2>
-            <div id="calendar" class="calendar">
-                <!-- Calendar will be generated here by PHP/JS -->
-                <div class="calendar-header">
-                    <button id="prev-month">&lt;</button>
-                    <h3 id="month-year">Noviembre 2025</h3>
-                    <button id="next-month">&gt;</button>
-                </div>
-                <div class="calendar-days">
-                    <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
-                </div>
-                <div class="calendar-dates">
-                    <!-- Dates will be populated here -->
-                </div>
+    <div class="scheduler-content">
+        <div class="date-navigation">
+            <button class="nav-arrow" id="prev-week">&lt;</button>
+            <span class="date-range" id="date-range-display">11 nov - 13 nov 2025</span>
+            <button class="nav-arrow" id="next-week">&gt;</button>
+        </div>
+
+        <div class="day-selector-card">
+            <h3 class="card-title"><i class="far fa-calendar-alt"></i> Elige un Día</h3>
+            <div class="days-wrapper" id="days-container">
+                <!-- Day cards will be dynamically inserted here by JavaScript -->
             </div>
         </div>
 
-        <!-- Time Slots Section -->
-        <div class="time-slots-wrapper">
-            <h2>Horas Disponibles</h2>
-            <div id="time-slots" class="time-slots">
-                <p class="no-slots-selected">Selecciona una fecha para ver las horas disponibles.</p>
-                <!-- Available time slots will be loaded here via AJAX -->
+        <div class="time-selector-card">
+            <h3 class="card-title"><i class="far fa-clock"></i> Elige una Hora</h3>
+            <div class="time-slots-wrapper-agendar" id="time-slots">
+                 <p class="no-slots-selected">Selecciona una fecha para ver las horas disponibles.</p>
+                 <!-- Available time slots will be loaded here via AJAX -->
             </div>
         </div>
     </div>
