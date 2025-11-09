@@ -1,70 +1,102 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const calendarDates = document.querySelector('.calendar-dates');
-    const monthYearEl = document.getElementById('month-year');
-    const prevMonthBtn = document.getElementById('prev-month');
-    const nextMonthBtn = document.getElementById('next-month');
+    // New elements for the redesigned "Agendar Cita" page
+    const daysContainer = document.getElementById('days-container');
+    const dateRangeDisplay = document.getElementById('date-range-display');
+    const prevWeekBtn = document.getElementById('prev-week');
+    const nextWeekBtn = document.getElementById('next-week');
     const timeSlotsEl = document.getElementById('time-slots');
 
+    // Only run this script if the necessary elements are on the page
+    if (!daysContainer) {
+        return;
+    }
+
     let currentDate = new Date();
-    currentDate.setDate(1); // Start with the first day of the month
 
-    function renderCalendar() {
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-        monthYearEl.textContent = `${new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(currentDate)} ${year}`;
+    const formatDate = (date) => {
+        const options = { day: 'numeric', month: 'short' };
+        return new Intl.DateTimeFormat('es-ES', options).format(date);
+    }
+    
+    const toISODateString = (date) => {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
 
-        const firstDayOfMonth = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+    function renderWeekSelector() {
+        // Clear previous content
+        daysContainer.innerHTML = '';
+        timeSlotsEl.innerHTML = '<p class="no-slots-selected">Selecciona una fecha para ver las horas disponibles.</p>';
 
-        calendarDates.innerHTML = '';
+        // Calculate week range
+        const weekStart = new Date(currentDate);
+        // weekStart.setDate(currentDate.getDate() - currentDate.getDay()); // Start week on Sunday
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6); // Display 7 days
 
-        // Add empty slots for days before the month starts
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            calendarDates.innerHTML += `<div class="calendar-day empty"></div>`;
-        }
+        // Update the date range display header
+        dateRangeDisplay.textContent = `${formatDate(weekStart)} - ${formatDate(weekEnd)} ${weekStart.getFullYear()}`;
 
-        // Add days of the month
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayEl = document.createElement('div');
-            dayEl.classList.add('calendar-day');
-            dayEl.textContent = day;
-            dayEl.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        // Generate day cards for the next 7 days
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(weekStart.getDate() + i);
 
-            // Highlight today's date
+            const dayCard = document.createElement('div');
+            dayCard.className = 'day-card';
+            dayCard.dataset.date = toISODateString(dayDate);
+
+            const dayName = document.createElement('span');
+            dayName.className = 'day-name';
+            dayName.textContent = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(dayDate);
+            
+            const dayNumber = document.createElement('span');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = dayDate.getDate();
+
+            dayCard.appendChild(dayName);
+            dayCard.appendChild(dayNumber);
+
+            // Highlight today
             const today = new Date();
-            if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
-                dayEl.classList.add('today');
+            if (dayDate.toDateString() === today.toDateString()) {
+                dayCard.classList.add('today'); // You can style this class if you want
             }
 
-            calendarDates.appendChild(dayEl);
-        }
-
-        // Add click event listener to each day
-        document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
-            day.addEventListener('click', function() {
-                document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
+            dayCard.addEventListener('click', function() {
+                // Remove selected state from others
+                document.querySelectorAll('.day-card.selected').forEach(card => card.classList.remove('selected'));
+                // Add selected state to clicked card
                 this.classList.add('selected');
+                // Fetch time slots for the selected date
                 fetchTimeSlots(this.dataset.date);
             });
-        });
+
+            daysContainer.appendChild(dayCard);
+        }
     }
 
     async function fetchTimeSlots(date) {
         timeSlotsEl.innerHTML = '<p>Cargando horas...</p>';
         try {
-            const response = await fetch(`/api/get_slots.php?date=${date}`);
+            // NOTE: This assumes an API endpoint exists at this path.
+            // This might need adjustment based on the actual project structure.
+            const response = await fetch(`api/get_slots.php?date=${date}`);
+            if (!response.ok) {
+                 throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const slots = await response.json();
 
             timeSlotsEl.innerHTML = '';
             if (slots.length > 0) {
                 slots.forEach(slot => {
                     const slotEl = document.createElement('div');
-                    slotEl.classList.add('time-slot');
+                    slotEl.classList.add('time-slot-agendar');
                     if (!slot.available) {
                         slotEl.classList.add('reserved');
-                        slotEl.textContent = `${slot.time} (Reservada)`;
+                        slotEl.textContent = `${slot.time}`;
                     } else {
                         slotEl.textContent = slot.time;
+                        // Attach click event to open booking modal
                         slotEl.addEventListener('click', () => openBookingModal(date, slot.time));
                     }
                     timeSlotsEl.appendChild(slotEl);
@@ -73,35 +105,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 timeSlotsEl.innerHTML = '<p>No hay horas disponibles para este día.</p>';
             }
         } catch (error) {
-            timeSlotsEl.innerHTML = '<p>Error al cargar las horas. Inténtalo de nuevo.</p>';
+            console.error("Error fetching time slots:", error);
+            timeSlotsEl.innerHTML = '<p>Error al cargar las horas. Es posible que el servicio no esté disponible.</p>';
         }
     }
 
     function openBookingModal(date, time) {
         const modal = document.getElementById('booking-modal');
-        document.getElementById('modal-date').textContent = date;
-        document.getElementById('modal-time').textContent = time;
-        document.getElementById('modal-datetime-input').value = `${date} ${time}`;
-        modal.style.display = 'block';
-        loadServices();
+        if (modal) {
+            document.getElementById('modal-date').textContent = date;
+            document.getElementById('modal-time').textContent = time;
+            document.getElementById('modal-datetime-input').value = `${date} ${time}`;
+            modal.style.display = 'block';
+            // loadServices(); // Assuming this function exists to populate service options in the modal
+        } else {
+            console.error("Booking modal not found on this page.");
+        }
     }
+    
+    // Event Listeners for week navigation
+    prevWeekBtn.addEventListener('click', () => {
+        currentDate.setDate(currentDate.getDate() - 7);
+        renderWeekSelector();
+    });
 
-    // Additional functions for modal, form submission, etc. will go here.
-    if (prevMonthBtn) {
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
+    nextWeekBtn.addEventListener('click', () => {
+        currentDate.setDate(currentDate.getDate() + 7);
+        renderWeekSelector();
+    });
+
+    // Initial render
+    renderWeekSelector();
+});
+
+// Logic for other pages can go here, or be in separate files.
+// For example, the modal closing logic:
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('booking-modal');
+    if (modal) {
+        const closeBtn = modal.querySelector('.close-button');
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
         });
-    }
 
-    if (nextMonthBtn) {
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
+        window.addEventListener('click', (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
         });
-    }
-
-    if (calendarDates) {
-        renderCalendar();
     }
 });
